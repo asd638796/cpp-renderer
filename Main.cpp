@@ -1,10 +1,12 @@
 #include <iostream>
+#include "Board.h"
 using namespace std;
+
 
 int main() {
     
     Board board;
-
-    cout << "Hello World!";
+    board.show_board();
+    
     return 0;
 }
