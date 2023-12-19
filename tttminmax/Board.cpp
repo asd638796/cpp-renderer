@@ -17,8 +17,44 @@ cout << this->arr[3] + " | " + this->arr[4] + " | " + this->arr[5] << endl;
 cout << this->arr[6] + " | " + this->arr[7] + " | " + this->arr[8] << endl;
 }
 
-void Board::set_board(int index, string val){
-    this->arr[index] = val;
+int Board::set_board(int index, string val){
+    if(this->arr[index] == "0"){
+        this->arr[index] = val;
+        return 1;
+    }
+    return 0;
+}
+
+int* Board::blanks(string board[]){
+    int count = 0;
+    int array_count = 0;
+    
+    for(int i = 0; i<9; i++){
+        if(board[i] == "0"){
+            count++;
+        }
+    }
+
+    int* array = new int[count];
+
+    for(int i = 0; i<9; i++){
+        if(board[i] == "0"){
+            array[array_count] = i;
+            array_count++;
+        }
+    }
+
+    return array;
+
+}
+
+bool Board::isFull(string board[]){
+    for(int i = 0; i < 9; i++){
+        if(board[i] == "0"){
+            return false;
+        }
+    }
+    return true;
 }
 
 
@@ -39,6 +75,8 @@ bool Board::check_win(string board[], string icon){
         return false;
     }else if (board[6] == icon & board[4] == icon & board[2] == icon){
         return false;
+    }else{
+        return true;
     }
     
 }

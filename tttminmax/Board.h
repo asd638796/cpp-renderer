@@ -14,9 +14,14 @@ public:
 
     void show_board();
 
-    void set_board(int index, string val);
+    int set_board(int index, string val);
 
     bool check_win(string board[], string icon);
+
+    int* blanks(string board[]);
+
+    bool isFull(string board[]);
+
 };
 
 #endif 
