@@ -9,14 +9,19 @@ objparser::objparser(string filename){
     }
 
     string line;
+    float vertex[3];
 
     while(getline(file, line)){
-        lines.push_back(line);
+        if(line.at(0) == 'v'){
+            for(int i = 0; i < 3; i++){
+                
+            }
+        }
     }
 
     //parse vertices
 
-    
+
 
 
 }
