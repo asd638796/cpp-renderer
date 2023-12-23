@@ -1,1 +1,1 @@
-projects I do in c++
+making a renderer from scratch in c++.

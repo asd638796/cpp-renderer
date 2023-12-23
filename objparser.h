@@ -4,13 +4,16 @@
 #include <iostream>
 #include <fstream>
 #include <deque>
+#include <sstream>
+#include <vector>
+
 using namespace std;
 
 class objparser {
 public:
     
     deque<string> lines;
-    deque<float> vertices;
+    deque<vector<float>> vertices;
     ifstream file;
     objparser(string filename);
 
