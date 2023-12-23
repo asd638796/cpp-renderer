@@ -6,8 +6,8 @@ int main(){
 
     objparser obj_parser("african_head.obj");
 
-    for (int i = 0; i < obj_parser.lines.size(); i++) {
-        cout << "Line " << i + 1 << ": " << obj_parser.lines[i] << endl;
+    for(vector<float> v : obj_parser.vertices){
+        std::cout << std::to_string(v[0]) + " , " + std::to_string(v[1]) + " , " + std::to_string(v[2]) << std::endl;
     }
 
     return 0;
