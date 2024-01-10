@@ -35,6 +35,38 @@ void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
     } 
 } 
 
+void fillBottomFlatTriangle(int v1_x, int v1_y, int v2_x, int v2_y, int v3_x, int v3_y, TGAImage &image, TGAColor color){
+    float invslope1 = (v2_x - v1_x) / (v2_y - v1_y);
+    float invslope2 = (v3_x - v1_x / (v3_y - v1_y));
+
+    float curx1 = v1_x;
+    float curx2 = v1_x;
+
+    for(int scanlineY = v1_y; scanlineY <= v2_y; scanlineY++){
+        line((int) curx1, scanlineY, (int) curx2, scanlineY, image, color);
+        curx1 += invslope1;
+        curx2 += invslope2;
+    }
+
+
+}
+
+void fillTopFlatTriangle(int v1_x, int v1_y, int v2_x, int v2_y, int v3_x, int v3_y, TGAImage &image, TGAColor color){
+    float invslope1 = (v3_x - v1_x) / (v3_y - v1_y);
+    float invslope2 = (v3_x - v2_x / (v3_y - v2_y));
+
+    float curx1 = v3_x;
+    float curx2 = v3_x;
+
+    for(int scanlineY = v3_y; scanlineY > v1_y; scanlineY++){
+        line((int) curx1, scanlineY, (int) curx2, scanlineY, image, color);
+        curx1 -= invslope1;
+        curx2 -= invslope2;
+    }
+
+
+}
+
 int main(){
 
     objparser obj_parser("african_head.obj");
