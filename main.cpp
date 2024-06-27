@@ -35,92 +35,34 @@ void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
     } 
 } 
 
-void fillBottomFlatTriangle(int v1_x, int v1_y, int v2_x, int v2_y, int v3_x, int v3_y, TGAImage &image, TGAColor color){
-    float invslope1 = (v2_x - v1_x) / (v2_y - v1_y);
-    float invslope2 = (v3_x - v1_x / (v3_y - v1_y));
-
-    float curx1 = v1_x;
-    float curx2 = v1_x;
-
-    for(int scanlineY = v1_y; scanlineY <= v2_y; scanlineY++){
-        line((int) curx1, scanlineY, (int) curx2, scanlineY, image, color);
-        curx1 += invslope1;
-        curx2 += invslope2;
-    }
-
-
-}
-
-void fillTopFlatTriangle(int v1_x, int v1_y, int v2_x, int v2_y, int v3_x, int v3_y, TGAImage &image, TGAColor color){
-    float invslope1 = (v3_x - v1_x) / (v3_y - v1_y);
-    float invslope2 = (v3_x - v2_x) / (v3_y - v2_y);
-
-    float curx1 = v3_x;
-    float curx2 = v3_x;
-
-    for(int scanlineY = v3_y; scanlineY > v1_y; scanlineY--){
-        line((int) curx1, scanlineY, (int) curx2, scanlineY, image, color);
-        curx1 -= invslope1;
-        curx2 -= invslope2;
-    }
-
-
-}
-
-
-void drawTriangle(int v1_x, int v1_y, int v2_x, int v2_y, int v3_x, int v3_y, TGAImage &image, TGAColor color)
+bool edgeFunction(int v1x, int v1y, int v2x, int v2y, int v3x, int v3y)
 {
-   /* at first sort the three vertices by y-coordinate ascending so v1 is the topmost vertice */
-  if(v1_y > v2_y){  
-    swap(v1_y, v2_y);
-    swap(v1_x, v2_x);
-  }
-  
-  if(v2_y > v3_y){
-    swap(v2_y, v3_y);
-    swap(v2_x, v3_x);
-  }
-
-  if(v1_y > v2_y){
-    swap(v1_y, v2_y);
-    swap(v1_x, v2_x);
-  }
-
-  
-  /* check for trivial case of bottom-flat triangle */
-  if (v2_y == v3_y)
-  {
-    fillBottomFlatTriangle(v1_x, v1_y, v2_x, v2_y, v3_x, v3_y, image, color);
-  }
-  /* check for trivial case of top-flat triangle */
-  else if (v1_y == v2_y)
-  {
-    fillTopFlatTriangle(v1_x, v1_y, v2_x, v2_y, v3_x, v3_y, image, color);
-  }
-  else
-  {
-    /* general case - split the triangle in a topflat and bottom-flat one */
-    int v4_x = (int)(v1_x + ((float)(v2_y - v1_y) / (float)(v3_y - v1_y)) * (v3_x - v1_x));
-    int v4_y = v2_y;
-
-    
-    fillBottomFlatTriangle(v1_x, v1_y, v2_x, v2_y,  v4_x, v4_y, image, color);
-    //fillTopFlatTriangle(v2_x, v2_y, v4_x, v4_y, v3_x, v3_y, image, color);
-
-    
-  }
+    return ((v3x - v1x) * (v2y - v1y) - (v3y - v1y) * (v2x - v1x) >= 0);
 }
+
+bool inTriangle(int v1x, int v1y, int v2x, int v2y, int v3x, int v3y, int v4x, int v4y)
+{
+    bool inside = true;
+    inside &= edgeFunction(v1x, v1y, v2x, v2y, v4x, v4y);
+    inside &= edgeFunction(v2x, v2y, v3x, v3y, v4x, v4y);
+    inside &= edgeFunction(v3x, v3y, v1x, v1y, v4x, v4y);
+
+    return inside;
+}
+
 
 int main(){
 
     objparser obj_parser("african_head.obj");
     TGAImage image(500, 500, TGAImage::RGB);
+    
 
-    /*for(vector<int> face : obj_parser.faces){
+    for(vector<int> face : obj_parser.faces){
         
         vector<float> v1 = obj_parser.vertices[face[0] - 1];
         vector<float> v2 = obj_parser.vertices[face[1] - 1];
         vector<float> v3 = obj_parser.vertices[face[2] - 1];
+        TGAColor colour = TGAColor(rand()%255, rand()%255, rand()%255, 255);
 
         int v1x = int ((image.get_width() / 2) + image.get_width() / 2 * v1[0]);
         int v1y = int ((image.get_height() / 2) + image.get_height() / 2 * v1[1]);
@@ -129,19 +71,20 @@ int main(){
         int v3x = int ((image.get_width() / 2) + image.get_width() / 2 * v3[0]);
         int v3y = int ((image.get_height() / 2) + image.get_height() / 2 * v3[1]);
 
-        
-        drawTriangle(v1x, v1y, v2x, v2y, v3x, v3y, image, 
-        TGAColor(rand()%255, rand()%255, rand()%255, 255));
-        
-        
-    }*/
+        int minX = min(v3x, min(v1x, v2x));
+        int minY = min(v3y, min(v1y, v2y));
+        int maxX = max(v3x, max(v1x, v2x));
+        int maxY = max(v3y, max(v1y, v2y));
 
-    drawTriangle(200, 200, 150, 150, 78, 78, image, 
-        TGAColor(rand()%255, rand()%255, rand()%255, 255));
-
-    
-
-    
+        for(int i =minX; i < maxX; i++){
+            for(int j=minY; j < maxY ; j++){
+                if(inTriangle(v1x, v1y, v2x, v2y, v3x, v3y, i, j)){
+                    image.set(i,j,colour);
+                }
+            }
+        }
+        
+    }
     
 	
     image.flip_vertically();
