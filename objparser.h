@@ -11,13 +11,15 @@ using namespace std;
 
 class objparser {
 public:
-    
     deque<string> lines;
     deque<vector<float>> vertices;
     deque<vector<int>> faces;
     ifstream file;
     objparser(string filename);
 
+private:
+    void parseVertexLine(const string& line);
+    void parseFaceLine(const string& line);
 };
 
-#endif 
+#endif // OBJPARSER_H
