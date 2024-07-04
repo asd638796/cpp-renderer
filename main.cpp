@@ -63,7 +63,7 @@ Vec3f barycentric(const Vec3f &A, const Vec3f &B, const Vec3f &C, const Vec3f &P
     return Vec3f(-1, 1, 1); // In this case generate negative coordinates, it will be outside of the triangle
 }
 
-void triangle(Vec3f *pts, float *zbuffer, TGAImage &image, TGAColor color) {
+void triangle(Vec3f *pts, float *zbuffer, TGAImage &image, Vec2f *tex, TGAImage &texture) {
     Vec2f bboxmin( std::numeric_limits<float>::max(),  std::numeric_limits<float>::max());
     Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
     Vec2f clamp(image.get_width() - 1, image.get_height() - 1);
@@ -85,7 +85,10 @@ void triangle(Vec3f *pts, float *zbuffer, TGAImage &image, TGAColor color) {
             int idx = int(P.x + P.y * image.get_width());
             if (zbuffer[idx] < P.z) {
                 zbuffer[idx] = P.z;
+                Vec2f texCoord = tex[0] * bc_screen.x + tex[1] * bc_screen.y + tex[2] * bc_screen.z;
+                TGAColor color = texture.get(texCoord.x * texture.get_width(), texCoord.y * texture.get_height());
                 image.set(P.x, P.y, color);
+                
             }
         }
     }
@@ -100,14 +103,25 @@ int main() {
     TGAImage image(500, 500, TGAImage::RGB);
     Vec3f light_dir(0, 0, -1); // define light_dir
 
+    TGAImage texture;
+    texture.read_tga_file("african_head_diffuse.tga"); // Load the texture
+    texture.flip_vertically(); // Make sure the texture is oriented correctly
+
     int width = image.get_width();
     int height = image.get_height();
     float* zbuffer = new float[width * height];
+
+
     for (int i = 0; i < width * height; ++i) {
         zbuffer[i] = -std::numeric_limits<float>::infinity();
     }
 
-    for (const auto& face : obj_parser.faces) {
+    for (size_t i = 0; i < obj_parser.faces.size(); ++i) {
+        
+        const vector<int>& face = obj_parser.faces[i];
+        const vector<int>& texCoords = obj_parser.faceTexCoords[i];
+
+        
         Vec3f v1w(obj_parser.vertices[face[0] - 1][0], 
                   obj_parser.vertices[face[0] - 1][1], 
                   obj_parser.vertices[face[0] - 1][2]);
@@ -122,14 +136,19 @@ int main() {
         Vec3f v2s = world2screen(v2w, width, height);
         Vec3f v3s = world2screen(v3w, width, height);
 
+        Vec2f vt1(obj_parser.vt[texCoords[0] - 1][0], obj_parser.vt[texCoords[0] - 1][1]);
+        Vec2f vt2(obj_parser.vt[texCoords[1] - 1][0], obj_parser.vt[texCoords[1] - 1][1]);
+        Vec2f vt3(obj_parser.vt[texCoords[2] - 1][0], obj_parser.vt[texCoords[2] - 1][1]);
+
         Vec3f screen_coords[3] = { v1s, v2s, v3s };
+        Vec2f tex_coords[3] = { vt1, vt2, vt3 };
 
         Vec3f normal = triangleNormal(v1w, v2w, v3w);
         float intensity = normal.dot(light_dir);
 
         if (intensity > 0) {
-            TGAColor color = TGAColor(intensity * 255, intensity * 255, intensity * 255, 255);
-            triangle(screen_coords, zbuffer, image, color);
+            
+            triangle(screen_coords, zbuffer, image, tex_coords, texture);
         }
     }
 
