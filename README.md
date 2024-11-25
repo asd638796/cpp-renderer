@@ -1,1 +1,2 @@
-making a renderer from scratch in c++.
+The goal of this project is to create a renderer that parses .obj files from scratch in order to learn more about the rendering pipeline. 
+![Current Progress](./output.png)
